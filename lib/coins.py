@@ -577,6 +577,18 @@ class BitcoinCashTestnet(BitcoinTestnetMixin, Coin):
         'ciiattqkgzebpp6jofjbrkhvhwmgnsfoayljdcrve2p3qmkbv3duaoyd.onion '
         't53001 s53002',
     ]
+    
+class BitcoinCashRegtest(BitcoinTestnetMixin, Coin):
+    '''Bitcoin Regrest for Bitcoin Cash daemons.'''
+    NAME = "BitcoinCash"
+    NET = "regtest"
+    GENESIS_HASH = ('0f9188f13cb7b2c71f2a335e3a4fc328'
+                    'bf5beb436012afca590b1a11466e2206')
+
+    PEERS= []
+    TX_COUNT = 1
+    TX_COUNT_HEIGHT = 1
+
 
 
 class BitcoinSegwitTestnet(BitcoinTestnetMixin, Coin):
