@@ -677,6 +677,13 @@ class LitecoinTestnet(Litecoin):
         'electrum.ltc.xurious.com s t',
     ]
 
+class LitecoinRegtest(LitecoinTestnet):
+    NET = "regtest"
+    GENESIS_HASH = ('530827f38f93b43ed12af0b3ad25a288dc02ed74d6d7857862df51fc56c416f9')
+    PEERS = []
+    TX_COUNT = 1
+    TX_COUNT_HEIGHT = 1
+
 
 class Viacoin(AuxPowMixin, Coin):
     NAME = "Viacoin"
