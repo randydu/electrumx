@@ -1184,6 +1184,42 @@ class Peercoin(Coin):
     RPC_PORT = 9902
     REORG_LIMIT = 5000
 
+class BPcoin(Coin):
+    NAME = "BPcoin"
+    SHORTNAME = "BPX"
+    NET = "mainnet
+    P2PKH_VERBYTE = bytes.fromhex("19")
+    P2SH_VERBYTES = [bytes.fromhex("55")]
+    WIF_BYTE = bytes.fromhex("99")
+    GENESIS_HASH = ('00000000230d146b241e77eadffbf473'
+                    '8dbe1aca26388cf780f1e99b20771b1a')
+    DESERIALIZER = lib_tx.DeserializerTxBPX
+    DAEMON = daemon.LegacyRPCDaemon
+    TX_COUNT = 1000
+    TX_COUNT_HEIGHT = 500
+    TX_PER_BLOCK = 2
+    RPC_PORT = 9632
+    REORG_LIMIT = 5000
+    PEER_DEFAULT_PORTS = {'t': '5401', 's': '5402'}
+
+class BPcoinTestnet(Coin):
+    NAME = "BPcoin"
+    SHORTNAME = "BPXT"
+    NET = "testnet"
+    P2PKH_VERBYTE = bytes.fromhex("42")
+    P2SH_VERBYTES = [bytes.fromhex("7f")]
+    WIF_BYTE = bytes.fromhex("c2")
+    GENESIS_HASH = ('0000075eaee50e7d1fd1796b3e493c2a'
+                    '96a56623be8aaa6ade1280be9a98ad02')
+    DESERIALIZER = lib_tx.DeserializerTxBPX
+    DAEMON = daemon.LegacyRPCDaemon
+    REORG_LIMIT = 5000
+    TX_COUNT = 100
+    TX_COUNT_HEIGHT = 100
+    TX_PER_BLOCK = 2
+    RPC_PORT = 9635
+    PEER_DEFAULT_PORTS = {'t': '6401', 's': '6402'}
+
 
 class Reddcoin(Coin):
     NAME = "Reddcoin"

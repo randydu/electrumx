@@ -67,6 +67,9 @@ class TxInput(namedtuple("TxInput", "prev_hash prev_idx script sequence")):
 class TxOutput(namedtuple("TxOutput", "value pk_script")):
     pass
 
+class TxOutputBPX(namedtuple("TxOutput", "value pk_script hint payload")):
+    pass
+
 
 class Deserializer(object):
     '''Deserializes blocks into transactions.
@@ -132,6 +135,34 @@ class Deserializer(object):
         return TxOutput(
             self._read_le_int64(),  # value
             self._read_varbytes(),  # pk_script
+        )
+
+    def _read_outputs_bpx(self):
+        ''' bpcoin: returns BPX payload in transaction output '''
+        value = self._read_le_int64()
+        pk_script = self._read_varbytes()
+        
+        hint = self._read_varint();  # skip hint
+        payload = self._read_varbytes() # skip payload
+
+        return TxOutputBPX(
+            value,  
+            pk_script,
+            hint,
+            payload
+        )
+
+    def _read_outputs_skip_payload(self):
+        ''' bpcoin: skip payload in transaction output '''
+        value = self._read_le_int64()
+        pk_script = self._read_varbytes()
+
+        self._read_varint();  # skip hint
+        self._read_varbytes() # skip payload
+
+        return TxOutput(
+            value,  
+            pk_script
         )
 
     def _read_byte(self):
@@ -347,6 +378,16 @@ class DeserializerTxTime(Deserializer):
             self._read_le_uint32(),  # time
             self._read_inputs(),     # inputs
             self._read_outputs(),    # outputs
+            self._read_le_uint32(),  # locktime
+        )
+
+class DeserializerTxBPX(Deserializer):
+    def read_tx(self):
+        return TxTime(
+            self._read_le_int32(),   # version
+            self._read_le_uint32(),  # time
+            self._read_inputs(),     # inputs
+            self._read_outputs_bpx(),    # outputs
             self._read_le_uint32(),  # locktime
         )
 
