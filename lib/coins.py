@@ -1202,8 +1202,7 @@ class BPcoin(Coin):
     TX_COUNT = 1000
     TX_COUNT_HEIGHT = 500
     TX_PER_BLOCK = 2
-    RPC_PORT = 9632
-    REORG_LIMIT = 5000
+    REORG_LIMIT = 800
     @classmethod
     def header_hash(cls, header):
         '''Given a header return the hash.'''
@@ -1218,8 +1217,8 @@ class BPcoinTestnet(BPcoin):
     WIF_BYTE = bytes.fromhex("c2")
     GENESIS_HASH = ('0000075eaee50e7d1fd1796b3e493c2a'
                     '96a56623be8aaa6ade1280be9a98ad02')
-    REORG_LIMIT = 5000
-    TX_COUNT = 100
+    REORG_LIMIT = 500
+    TX_COUNT = 200
     TX_COUNT_HEIGHT = 100
     TX_PER_BLOCK = 2
 
