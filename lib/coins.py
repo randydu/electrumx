@@ -1204,7 +1204,6 @@ class BPcoin(Coin):
     TX_PER_BLOCK = 2
     RPC_PORT = 9632
     REORG_LIMIT = 5000
-    PEER_DEFAULT_PORTS = {'t': '5401', 's': '5402'}
     @classmethod
     def header_hash(cls, header):
         '''Given a header return the hash.'''
