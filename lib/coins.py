@@ -1187,7 +1187,7 @@ class Peercoin(Coin):
 class BPcoin(Coin):
     NAME = "BPcoin"
     SHORTNAME = "BPX"
-    NET = "mainnet
+    NET = "mainnet"
     P2PKH_VERBYTE = bytes.fromhex("19")
     P2SH_VERBYTES = [bytes.fromhex("55")]
     WIF_BYTE = bytes.fromhex("99")
