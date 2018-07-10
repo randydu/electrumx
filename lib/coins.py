@@ -39,7 +39,7 @@ from functools import partial
 import base64
 
 import lib.util as util
-from lib.hash import Base58, hash160, double_sha256, hash_to_str, HASHX_LEN
+from lib.hash import Base58, hash160, double_sha256, hash_to_str, HASHX_LEN 
 from lib.script import ScriptPubKey, OpCodes
 import lib.tx as lib_tx
 from server.block_processor import BlockProcessor
@@ -76,6 +76,8 @@ class Coin(object):
     # Peer discovery
     PEER_DEFAULT_PORTS = {'t': '50001', 's': '50002'}
     PEERS = []
+    # coin-specific hash algorithm
+    HASH_ALGO = 'sha256d'
 
     @classmethod
     def lookup_coin_class(cls, name, net):
@@ -120,6 +122,7 @@ class Coin(object):
         Return the block less its unspendable coinbase.
         '''
         header = cls.block_header(block, 0)
+
         header_hex_hash = hash_to_str(cls.header_hash(header))
         if header_hex_hash != cls.GENESIS_HASH:
             raise CoinError('genesis block has hash {} expected {}'
@@ -1188,6 +1191,7 @@ class BPcoin(Coin):
     NAME = "BPcoin"
     SHORTNAME = "BPX"
     NET = "mainnet"
+    HASH_ALGO = 'x16r'
     P2PKH_VERBYTE = bytes.fromhex("19")
     P2SH_VERBYTES = [bytes.fromhex("55")]
     WIF_BYTE = bytes.fromhex("99")
@@ -1201,9 +1205,13 @@ class BPcoin(Coin):
     RPC_PORT = 9632
     REORG_LIMIT = 5000
     PEER_DEFAULT_PORTS = {'t': '5401', 's': '5402'}
+    @classmethod
+    def header_hash(cls, header):
+        '''Given a header return the hash.'''
+        import x16r_hash
+        return x16r_hash.getPoWHash(header)
 
-class BPcoinTestnet(Coin):
-    NAME = "BPcoin"
+class BPcoinTestnet(BPcoin):
     SHORTNAME = "BPXT"
     NET = "testnet"
     P2PKH_VERBYTE = bytes.fromhex("42")
@@ -1211,14 +1219,10 @@ class BPcoinTestnet(Coin):
     WIF_BYTE = bytes.fromhex("c2")
     GENESIS_HASH = ('0000075eaee50e7d1fd1796b3e493c2a'
                     '96a56623be8aaa6ade1280be9a98ad02')
-    DESERIALIZER = lib_tx.DeserializerTxBPX
-    DAEMON = daemon.LegacyRPCDaemon
     REORG_LIMIT = 5000
     TX_COUNT = 100
     TX_COUNT_HEIGHT = 100
     TX_PER_BLOCK = 2
-    RPC_PORT = 9635
-    PEER_DEFAULT_PORTS = {'t': '6401', 's': '6402'}
 
 
 class Reddcoin(Coin):
