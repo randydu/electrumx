@@ -154,6 +154,26 @@ class Coin(object):
         '''Given a pk_script, return the adddress it pays to, or None.'''
         return ScriptPubKey.pay_to(cls.address_handlers, script)
 
+    @classmethod
+    def verify_script_compatibility(cls, script):
+        ''' the input script must be in a standard form otherwise
+        the get_balance(addr) api does not work, because we use
+        hashX_script as key to the utxo db. The input script from full node
+        might not be the same as the one cooked by our api.
+
+        As a result, the eletrumx cannot index all non-standard scripts.
+        A solution is use address as key to utxo db.
+        '''
+        hashX0 = cls.hashX_from_script(script)
+
+        addr = cls.address_from_script(script)
+        hashX1 = cls.address_to_hashX(addr)
+
+        if(hashX0 != hashX1):
+            raise CoinError('script compatibility issue!')
+
+
+
     @staticmethod
     def lookup_xverbytes(verbytes):
         '''Return a (is_xpub, coin_class) pair given xpub/xprv verbytes.'''

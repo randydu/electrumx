@@ -138,13 +138,16 @@ class Deserializer(object):
         )
 
     def _read_outputs_bpx(self):
-        read_output_bpx = self._read_output_bpx
-        return [read_output_bpx() for i in range(self._read_varint())]
+        do_read = self._read_output_skip_payload
+        return [do_read() for i in range(self._read_varint())]
+
+
 
     def _read_output_bpx(self):
         ''' bpcoin: returns BPX payload in transaction output '''
         value = self._read_le_int64()
         pk_script = self._read_varbytes()
+        self._verify_bpx_script_compatibility(pk_script)
         
         hint = self._read_varint();  # skip hint
         payload = self._read_varbytes() # skip payload
@@ -156,7 +159,7 @@ class Deserializer(object):
             payload
         )
 
-    def _read_outputs_skip_payload(self):
+    def _read_output_skip_payload(self):
         ''' bpcoin: skip payload in transaction output '''
         value = self._read_le_int64()
         pk_script = self._read_varbytes()
