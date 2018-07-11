@@ -1215,8 +1215,12 @@ class BPcoinTestnet(BPcoin):
     P2PKH_VERBYTE = bytes.fromhex("42")
     P2SH_VERBYTES = [bytes.fromhex("7f")]
     WIF_BYTE = bytes.fromhex("c2")
-    GENESIS_HASH = ('0000075eaee50e7d1fd1796b3e493c2a'
-                    '96a56623be8aaa6ade1280be9a98ad02')
+    # easy one
+    GENESIS_HASH = ('002727d07be2b2a41d7e6932c39e4c2827623b7e04ec9e977e66f93cba698656')
+    # harder one
+    #GENESIS_HASH = ('0000075eaee50e7d1fd1796b3e493c2a'
+    #                '96a56623be8aaa6ade1280be9a98ad02')
+    #
     REORG_LIMIT = 500
     TX_COUNT = 200
     TX_COUNT_HEIGHT = 100
