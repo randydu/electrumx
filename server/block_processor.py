@@ -545,28 +545,29 @@ class BlockProcessor(server.db.DB):
             # Add the new UTXOs
             for idx, txout in enumerate(tx.outputs):
                 # Get the hashX.  Ignore unspendable outputs
-                hashX = script_hashX(txout.pk_script)
-                if hashX:
-                    ''' the input script must be in a standard form otherwise
-                    the get_balance(addr) api does not work, because we use
-                    hashX_script as key to the utxo db. The input script from full node
-                    might not be the same as the one cooked by our api.
+                if not txout.pk_script: # skip coinstake tx's first empty vout which is just a tag
+                    hashX = script_hashX(txout.pk_script)
+                    if hashX:
+                        ''' the input script must be in a standard form otherwise
+                        the get_balance(addr) api does not work, because we use
+                        hashX_script as key to the utxo db. The input script from full node
+                        might not be the same as the one cooked by our api.
 
-                    As a result, the eletrumx cannot index all non-standard scripts.
-                    A solution is use address as key to utxo db.
+                        As a result, the eletrumx cannot index all non-standard scripts.
+                        A solution is use address as key to utxo db.
 
-                    Given a p2pkh address to get_balance(), we cannot deduce the original script
-                    in the source block, because it can be in either p2pk or p2pkh format. so if
-                    we use the hashX of original script as db key, the get_balance() won't work properly.
-                    '''
-                    addr = addr_from_script(txout.pk_script)
-                    hashX1 = addr_to_hashX(addr)
-                    if(hashX != hashX1):
-                        raise ChainError('script compatibility issue!')
+                        Given a p2pkh address to get_balance(), we cannot deduce the original script
+                        in the source block, because it can be in either p2pk or p2pkh format. so if
+                        we use the hashX of original script as db key, the get_balance() won't work properly.
+                        '''
+                        addr = addr_from_script(txout.pk_script)
+                        hashX1 = addr_to_hashX(addr)
+                        if(hashX != hashX1):
+                            raise ChainError('script compatibility issue!')
 
-                    append_hashX(hashX)
-                    put_utxo(tx_hash + s_pack('<H', idx),
-                             hashX + tx_numb + s_pack('<Q', txout.value))
+                        append_hashX(hashX)
+                        put_utxo(tx_hash + s_pack('<H', idx),
+                                hashX + tx_numb + s_pack('<Q', txout.value))
 
             append_hashXs(hashXs)
             update_touched(hashXs)
