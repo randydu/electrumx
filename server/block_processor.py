@@ -545,7 +545,7 @@ class BlockProcessor(server.db.DB):
             # Add the new UTXOs
             for idx, txout in enumerate(tx.outputs):
                 # Get the hashX.  Ignore unspendable outputs
-                if not txout.pk_script: # skip coinstake tx's first empty vout which is just a tag
+                if len(txout.pk_script) > 0: # skip coinstake tx's first empty vout which is just a tag
                     hashX = script_hashX(txout.pk_script)
                     if hashX:
                         ''' the input script must be in a standard form otherwise
@@ -559,11 +559,15 @@ class BlockProcessor(server.db.DB):
                         Given a p2pkh address to get_balance(), we cannot deduce the original script
                         in the source block, because it can be in either p2pk or p2pkh format. so if
                         we use the hashX of original script as db key, the get_balance() won't work properly.
+
+                        HOWEVER, if you think of p2pkh and p2pk are two irelevant addresses, you have to use p2pk to get
+                        the balance of txouts which are paid to p2pk address, use p2pkh to get the balance of txouts paid
+                        to p2pkh addresses, even they are actually refer to the same value holder (holding the same privatekey)
                         '''
-                        addr = addr_from_script(txout.pk_script)
-                        hashX1 = addr_to_hashX(addr)
-                        if(hashX != hashX1):
-                            raise ChainError('script compatibility issue!')
+                        #addr = addr_from_script(txout.pk_script)
+                        #hashX1 = addr_to_hashX(addr)
+                        #if(hashX != hashX1):
+                        #    raise ChainError('script compatibility issue!')
 
                         append_hashX(hashX)
                         put_utxo(tx_hash + s_pack('<H', idx),
