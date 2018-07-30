@@ -147,15 +147,17 @@ class Deserializer(object):
         ''' bpcoin: returns BPX payload in transaction output '''
         value = self._read_le_int64()
         pk_script = self._read_varbytes()
-        self._verify_bpx_script_compatibility(pk_script)
+        #self._verify_bpx_script_compatibility(pk_script)
         
-        hint = self._read_varint();  # skip hint
-        payload = self._read_varbytes() # skip payload
+        hint = self._read_varint();  # hint
+        sub_hint = self._read_varint();  # sub-hint
+        payload = self._read_varbytes() # payload
 
         return TxOutputBPX(
             value,  
             pk_script,
             hint,
+            sub_hint,
             payload
         )
 
@@ -165,6 +167,7 @@ class Deserializer(object):
         pk_script = self._read_varbytes()
 
         self._read_varint();  # skip hint
+        self._read_varint();  # skip sub-hint
         self._read_varbytes() # skip payload
 
         return TxOutput(
