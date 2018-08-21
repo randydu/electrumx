@@ -1215,8 +1215,7 @@ class BPcoin(Coin):
     P2PKH_VERBYTE = bytes.fromhex("19")
     P2SH_VERBYTES = [bytes.fromhex("55")]
     WIF_BYTE = bytes.fromhex("99")
-    GENESIS_HASH = ('00000000230d146b241e77eadffbf473'
-                    '8dbe1aca26388cf780f1e99b20771b1a')
+    GENESIS_HASH = ('000000033642c5d9d11846ae558cba29b220bc37678ed25dc38103801117376e')
     DESERIALIZER = lib_tx.DeserializerTxBPX
     DAEMON = daemon.LegacyRPCDaemon
     TX_COUNT = 1000
@@ -1236,7 +1235,7 @@ class BPcoinTestnet(BPcoin):
     P2SH_VERBYTES = [bytes.fromhex("7f")]
     WIF_BYTE = bytes.fromhex("c2")
     # easy one
-    GENESIS_HASH = ('002727d07be2b2a41d7e6932c39e4c2827623b7e04ec9e977e66f93cba698656')
+    GENESIS_HASH = ('000080a58959f080440ad92363edc6843a0e1fe5f941ab01497251930a60b0d1')
     # harder one
     #GENESIS_HASH = ('0000075eaee50e7d1fd1796b3e493c2a'
     #                '96a56623be8aaa6ade1280be9a98ad02')

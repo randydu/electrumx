@@ -149,9 +149,10 @@ class Deserializer(object):
         pk_script = self._read_varbytes()
         #self._verify_bpx_script_compatibility(pk_script)
         
-        hint = self._read_varint();  # hint
-        sub_hint = self._read_varint();  # sub-hint
         payload = self._read_varbytes() # payload
+        if len(payload) > 0:
+            hint = self._read_varint();  # hint
+            sub_hint = self._read_varint();  # sub-hint
 
         return TxOutputBPX(
             value,  
@@ -166,9 +167,10 @@ class Deserializer(object):
         value = self._read_le_int64()
         pk_script = self._read_varbytes()
 
-        self._read_varint();  # skip hint
-        self._read_varint();  # skip sub-hint
-        self._read_varbytes() # skip payload
+        payload = self._read_varbytes() # skip payload
+        if len(payload) > 0:
+            self._read_varint();  # skip hint
+            self._read_varint();  # skip sub-hint
 
         return TxOutput(
             value,  
