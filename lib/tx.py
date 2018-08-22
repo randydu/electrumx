@@ -67,7 +67,7 @@ class TxInput(namedtuple("TxInput", "prev_hash prev_idx script sequence")):
 class TxOutput(namedtuple("TxOutput", "value pk_script")):
     pass
 
-class TxOutputBPX(namedtuple("TxOutput", "value pk_script hint payload")):
+class TxOutputBPX(namedtuple("TxOutput", "value pk_script payload hint subhint")):
     pass
 
 
@@ -393,14 +393,21 @@ class DeserializerTxTime(Deserializer):
             self._read_le_uint32(),  # locktime
         )
 
+class TxBPX(namedtuple("Tx", "version inputs outputs locktime time")):
+    '''Class representing BPX transaction that has a time field.'''
+
+    @cachedproperty
+    def is_coinbase(self):
+        return self.inputs[0].is_coinbase
+
 class DeserializerTxBPX(Deserializer):
     def read_tx(self):
-        return TxTime(
+        return TxBPX(
             self._read_le_int32(),   # version
-            self._read_le_uint32(),  # time
             self._read_inputs(),     # inputs
             self._read_outputs_bpx(),    # outputs
             self._read_le_uint32(),  # locktime
+            self._read_le_uint32(),  # time
         )
 
 
