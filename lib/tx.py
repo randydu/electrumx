@@ -96,7 +96,7 @@ class Deserializer(object):
             self._read_le_uint32()  # locktime
         )
 
-    def read_tx_and_hash(self):
+    def read_tx_and_hash(self, tx_idx):
         '''Return a (deserialized TX, tx_hash) pair.
 
         The hash needs to be reversed for human display; for efficiency
@@ -113,7 +113,7 @@ class Deserializer(object):
         '''Returns a list of (deserialized_tx, tx_hash) pairs.'''
         read = self.read_tx_and_hash
         # Some coins have excess data beyond the end of the transactions
-        return [read() for _ in range(self._read_varint())]
+        return [read(i) for i in range(self._read_varint())]
 
     def _read_inputs(self):
         read_input = self._read_input
@@ -137,45 +137,6 @@ class Deserializer(object):
             self._read_varbytes(),  # pk_script
         )
 
-    def _read_outputs_bpx(self):
-        do_read = self._read_output_skip_payload
-        return [do_read() for i in range(self._read_varint())]
-
-
-
-    def _read_output_bpx(self):
-        ''' bpcoin: returns BPX payload in transaction output '''
-        value = self._read_le_int64()
-        pk_script = self._read_varbytes()
-        #self._verify_bpx_script_compatibility(pk_script)
-        
-        payload = self._read_varbytes() # payload
-        if len(payload) > 0:
-            hint = self._read_varint();  # hint
-            sub_hint = self._read_varint();  # sub-hint
-
-        return TxOutputBPX(
-            value,  
-            pk_script,
-            hint,
-            sub_hint,
-            payload
-        )
-
-    def _read_output_skip_payload(self):
-        ''' bpcoin: skip payload in transaction output '''
-        value = self._read_le_int64()
-        pk_script = self._read_varbytes()
-
-        payload = self._read_varbytes() # skip payload
-        if len(payload) > 0:
-            self._read_varint();  # skip hint
-            self._read_varint();  # skip sub-hint
-
-        return TxOutput(
-            value,  
-            pk_script
-        )
 
     def _read_byte(self):
         cursor = self.cursor
@@ -393,6 +354,7 @@ class DeserializerTxTime(Deserializer):
             self._read_le_uint32(),  # locktime
         )
 
+
 class TxBPX(namedtuple("Tx", "version inputs outputs locktime time")):
     '''Class representing BPX transaction that has a time field.'''
 
@@ -401,14 +363,67 @@ class TxBPX(namedtuple("Tx", "version inputs outputs locktime time")):
         return self.inputs[0].is_coinbase
 
 class DeserializerTxBPX(Deserializer):
-    def read_tx(self):
-        return TxBPX(
-            self._read_le_int32(),   # version
-            self._read_inputs(),     # inputs
-            self._read_outputs_bpx(),    # outputs
-            self._read_le_uint32(),  # locktime
-            self._read_le_uint32(),  # time
+    def _read_outputs_bpx(self):
+        do_read = self._read_output_skip_payload
+        return [do_read() for i in range(self._read_varint())]
+
+    def _read_output_bpx(self):
+        ''' bpcoin: returns BPX payload in transaction output '''
+        value = self._read_le_int64()
+        pk_script = self._read_varbytes()
+        #self._verify_bpx_script_compatibility(pk_script)
+        
+        payload = self._read_varbytes() # payload
+        if len(payload) > 0:
+            hint = self._read_varint();  # hint
+            sub_hint = self._read_varint();  # sub-hint
+
+        return TxOutputBPX(
+            value,  
+            pk_script,
+            hint,
+            sub_hint,
+            payload
         )
+
+    def _read_output_skip_payload(self):
+        ''' bpcoin: skip payload in transaction output '''
+        value = self._read_le_int64()
+        pk_script = self._read_varbytes()
+
+        payload = self._read_varbytes() # skip payload
+        if len(payload) > 0:
+            self._read_varint();  # skip hint
+            self._read_varint();  # skip sub-hint
+
+        return TxOutput(
+            value,  
+            pk_script
+        )
+
+    def read_tx(self, tx_idx):
+        if tx_idx == 0: #coin-base tx
+            return super().read_tx()
+        else:
+            return TxBPX(
+                self._read_le_int32(),   # version
+                self._read_inputs(),     # inputs
+                self._read_outputs_bpx(),    # outputs
+                self._read_le_uint32(),  # locktime
+                self._read_le_uint32(),  # time
+            )
+
+    def read_tx_and_hash(self, tx_idx):
+        '''Return a (deserialized TX, tx_hash) pair.
+
+        The hash needs to be reversed for human display; for efficiency
+        we process it in the natural serialized order.
+        '''
+        start = self.cursor
+        tx = self.read_tx(tx_idx)
+        tx_id = double_sha256(self.binary[start:self.cursor])
+        return tx, tx_id
+
 
 
 class DeserializerReddcoin(Deserializer):

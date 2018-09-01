@@ -1217,7 +1217,7 @@ class BPcoin(Coin):
     WIF_BYTE = bytes.fromhex("99")
     GENESIS_HASH = ('0000004a31dc25afca65b2cae83475b5237035dbc2f9fda923b81cc67c8d194e')
     DESERIALIZER = lib_tx.DeserializerTxBPX
-    DAEMON = daemon.LegacyRPCDaemon
+    DAEMON = daemon.BPXDaemon
     TX_COUNT = 1000
     TX_COUNT_HEIGHT = 500
     TX_PER_BLOCK = 2

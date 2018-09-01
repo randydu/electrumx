@@ -238,6 +238,7 @@ class Daemon(object):
         '''Return the raw binary blocks with the given hex hashes.'''
         params_iterable = ((h, False) for h in hex_hashes)
         blocks = await self._send_vector('getblock', params_iterable)
+
         # Convert hex string to bytes
         return [hex_to_bytes(block) for block in blocks]
 
@@ -264,16 +265,15 @@ class Daemon(object):
 
     async def getrawtransaction(self, hex_hash, verbose=False):
         '''Return the serialized raw transaction with the given hash.'''
-        return await self._send_single('getrawtransaction',
-                                       (hex_hash, int(verbose)))
+        return await self._send_single('getrawtransaction', (hex_hash, int(verbose)))
 
     async def getrawtransactions(self, hex_hashes, replace_errs=True):
         '''Return the serialized raw transactions with the given hashes.
 
         Replaces errors with None by default.'''
         params_iterable = ((hex_hash, 0) for hex_hash in hex_hashes)
-        txs = await self._send_vector('getrawtransaction', params_iterable,
-                                      replace_errs=replace_errs)
+        txs = await self._send_vector('getrawtransaction', params_iterable, replace_errs=replace_errs)
+
         # Convert hex strings to bytes
         return [hex_to_bytes(tx) if tx else None for tx in txs]
 
@@ -383,3 +383,42 @@ class LegacyRPCDaemon(Daemon):
         if isinstance(t, int):
             return t
         return timegm(strptime(t, "%Y-%m-%d %H:%M:%S %Z"))
+
+
+class BPXDaemon(Daemon):
+    ''' BPChain Daemon '''
+
+    async def deserialised_block(self, hex_hash):
+        '''Return the deserialised block with the given hex hash.'''
+        # BPcoin needs extra format param to return raw block that 
+        # can be easily deserialized and calculate hashs
+        return await self._send_single('getblock', (hex_hash, True, False, 1))
+
+    async def raw_blocks(self, hex_hashes):
+        '''Return the raw binary blocks with the given hex hashes.'''
+        # BPcoin needs extra format param to return raw block that 
+        # can be easily deserialized and calculate hashs
+        params_iterable = ((h, False, False, 1) for h in hex_hashes)
+        blocks = await self._send_vector('getblock', params_iterable)
+
+        # Convert hex string to bytes
+        return [hex_to_bytes(block) for block in blocks]
+
+    async def getrawtransaction(self, hex_hash, verbose=False):
+        '''Return the serialized raw transaction with the given hash.'''
+
+        # BPcoin needs extra format param to return raw block that 
+        # can be easily deserialized and calculate hashs
+        return await self._send_single('getrawtransaction', (hex_hash, int(verbose), 1))
+
+    async def getrawtransactions(self, hex_hashes, replace_errs=True):
+        '''Return the serialized raw transactions with the given hashes.
+
+        Replaces errors with None by default.'''
+        # BPcoin needs extra format param to return raw block that 
+        # can be easily deserialized and calculate hashs
+        params_iterable = ((hex_hash, 0, 1) for hex_hash in hex_hashes)
+        txs = await self._send_vector('getrawtransaction', params_iterable, replace_errs=replace_errs)
+
+        # Convert hex strings to bytes
+        return [hex_to_bytes(tx) if tx else None for tx in txs]
