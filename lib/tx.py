@@ -96,7 +96,7 @@ class Deserializer(object):
             self._read_le_uint32()  # locktime
         )
 
-    def read_tx_and_hash(self, tx_idx):
+    def read_tx_and_hash(self):
         '''Return a (deserialized TX, tx_hash) pair.
 
         The hash needs to be reversed for human display; for efficiency
@@ -113,7 +113,7 @@ class Deserializer(object):
         '''Returns a list of (deserialized_tx, tx_hash) pairs.'''
         read = self.read_tx_and_hash
         # Some coins have excess data beyond the end of the transactions
-        return [read(i) for i in range(self._read_varint())]
+        return [read() for _ in range(self._read_varint())]
 
     def _read_inputs(self):
         read_input = self._read_input
@@ -401,8 +401,8 @@ class DeserializerTxBPX(Deserializer):
             pk_script
         )
 
-    def read_tx(self, tx_idx):
-        if tx_idx == 0: #coin-base tx
+    def read_tx(self, coinbase):
+        if coinbase: #coin-base tx
             return super().read_tx()
         else:
             return TxBPX(
@@ -413,17 +413,29 @@ class DeserializerTxBPX(Deserializer):
                 self._read_le_uint32(),  # time
             )
 
-    def read_tx_and_hash(self, tx_idx):
+    def read_tx_and_hash(self, coinbase):
         '''Return a (deserialized TX, tx_hash) pair.
 
         The hash needs to be reversed for human display; for efficiency
         we process it in the natural serialized order.
         '''
         start = self.cursor
-        tx = self.read_tx(tx_idx)
+        tx = self.read_tx(coinbase)
         tx_id = double_sha256(self.binary[start:self.cursor])
         return tx, tx_id
 
+    def read_tx_and_vsize(self):
+        '''Return a (deserialized TX, vsize) pair.
+
+            only called from mempool so the tx is non-coinbase
+        '''
+        return self.read_tx(False), self.binary_length
+
+    def read_tx_block(self):
+        '''Returns a list of (deserialized_tx, tx_hash) pairs.'''
+        read = self.read_tx_and_hash
+        # Some coins have excess data beyond the end of the transactions
+        return [read(i == 0) for i in range(self._read_varint())]
 
 
 class DeserializerReddcoin(Deserializer):
