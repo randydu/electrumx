@@ -401,7 +401,11 @@ class DeserializerTxBPX(Deserializer):
             pk_script
         )
 
-    def read_tx(self, coinbase):
+    def read_tx(self):
+        # this entry always read non-coinbase tx
+        return self.my_read_tx(False);
+
+    def my_read_tx(self, coinbase):
         if coinbase: #coin-base tx
             return super().read_tx()
         else:
@@ -420,7 +424,7 @@ class DeserializerTxBPX(Deserializer):
         we process it in the natural serialized order.
         '''
         start = self.cursor
-        tx = self.read_tx(coinbase)
+        tx = self.my_read_tx(coinbase)
         tx_id = double_sha256(self.binary[start:self.cursor])
         return tx, tx_id
 
@@ -429,7 +433,7 @@ class DeserializerTxBPX(Deserializer):
 
             only called from mempool so the tx is non-coinbase
         '''
-        return self.read_tx(False), self.binary_length
+        return self.my_read_tx(False), self.binary_length
 
     def read_tx_block(self):
         '''Returns a list of (deserialized_tx, tx_hash) pairs.'''
